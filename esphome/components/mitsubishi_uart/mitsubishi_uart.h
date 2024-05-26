@@ -4,6 +4,7 @@
 #include "esphome/core/component.h"
 #include "esphome/core/preferences.h"
 #include "esphome/components/uart/uart.h"
+#include "esphome/components/time/real_time_clock.h"
 #include "esphome/components/climate/climate.h"
 #include "esphome/components/select/select.h"
 #include "esphome/components/sensor/sensor.h"
@@ -94,6 +95,8 @@ class MitsubishiUART : public PollingComponent, public climate::Climate, public 
   // Turns on or off actively sending packets
   void set_active_mode(const bool active) { active_mode_ = active; };
 
+  void set_time_source(time::RealTimeClock *rtc) { time_source = rtc; }
+
  protected:
   void route_packet_(const Packet &packet);
 
@@ -157,6 +160,9 @@ class MitsubishiUART : public PollingComponent, public climate::Climate, public 
   void restore_preferences_();
 
   ESPPreferenceObject preferences_;
+
+  // Time Source
+  time::RealTimeClock *time_source = nullptr;
 
   // Internal sensors
   sensor::Sensor *thermostat_temperature_sensor_ = nullptr;

@@ -3,6 +3,7 @@ import esphome.config_validation as cv
 from esphome.components import (
     climate,
     uart,
+    time,
     sensor,
     binary_sensor,
     text_sensor,
@@ -30,6 +31,7 @@ CODEOWNERS = ["@Sammy1Am"]
 AUTO_LOAD = ["climate", "select", "sensor", "binary_sensor", "text_sensor", "switch"]
 DEPENDENCIES = [
     "uart",
+    "time",
     "climate",
     "sensor",
     "binary_sensor",
@@ -40,6 +42,7 @@ DEPENDENCIES = [
 
 CONF_HEATPUMP_UART = "heatpump_uart"
 CONF_THERMOSTAT_UART = "thermostat_uart"
+CONF_TIME_SOURCE = "time_source"
 
 CONF_THERMOSTAT_TEMPERATURE = "thermostat_temperature"
 CONF_ERROR_CODE = "error_code"
@@ -95,6 +98,7 @@ BASE_SCHEMA = (
             cv.GenerateID(CONF_ID): cv.declare_id(MitsubishiUART),
             cv.Required(CONF_HEATPUMP_UART): cv.use_id(uart.UARTComponent),
             cv.Optional(CONF_THERMOSTAT_UART): cv.use_id(uart.UARTComponent),
+            cv.Optional(CONF_TIME_SOURCE): cv.use_id(time.RealTimeClock),
             cv.Optional(CONF_NAME, default="Climate"): cv.string,
             cv.Optional(
                 CONF_SUPPORTED_MODES, default=DEFAULT_CLIMATE_MODES
@@ -264,8 +268,14 @@ async def to_code(config):
         # Add sensor as source
         SELECTS[CONF_TEMPERATURE_SOURCE_SELECT][2].append("Thermostat")
 
-    # Traits
+    # If RTC defined
+    if CONF_TIME_SOURCE in config:
+        rtc_component = await cg.get_variable(config[CONF_TIME_SOURCE])
+        cg.add(getattr(muart_component, "set_time_source")(rtc_component))
+    elif CONF_THERMOSTAT_UART_UART in config:
+        raise cv.RequiredFieldInvalid(f"{CONF_TIME_SOURCE} is required if {CONF_TS_UART} is set.")
 
+    # Traits
     traits = muart_component.config_traits()
 
     if CONF_SUPPORTED_MODES in config:

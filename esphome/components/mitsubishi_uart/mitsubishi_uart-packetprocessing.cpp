@@ -396,8 +396,12 @@ void MitsubishiUART::handle_adapter_state_get_request(const GetRequestPacket &pa
   response.setAutoHeatSetpoint(this->target_temperature_high);
   response.setAutoCoolSetpoint(this->target_temperature_low);
 
-  ESPTime stub { .second = 45, .minute = 57, .hour = 18, .day_of_month = 25, .month = 5, .year = 2024 };
-  response.setTimestamp(stub);
+  if (this->time_source != nullptr) {
+    response.setTimestamp(this->time_source->now());
+  } else {
+    ESP_LOGW(TAG, "No time source specified. Cannot provide accurate time!");
+    response.setTimestamp(ESPTime::from_epoch_utc(1704067200)); // 2024-01-01 00:00:00 Z
+  }
 
   ts_bridge_->send_packet(response);
 }
