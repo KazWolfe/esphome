@@ -103,21 +103,15 @@ BASE_SCHEMA = (
             cv.Optional(CONF_THERMOSTAT_UART): cv.use_id(uart.UARTComponent),
             cv.Optional(CONF_TIME_SOURCE): cv.use_id(time.RealTimeClock),
             cv.Optional(CONF_NAME, default="Climate"): cv.string,
-            cv.Optional(
-                CONF_SUPPORTED_MODES, default=DEFAULT_CLIMATE_MODES
-            ): cv.ensure_list(climate.validate_climate_mode),
-            cv.Optional(
-                CONF_SUPPORTED_FAN_MODES, default=DEFAULT_FAN_MODES
-            ): cv.ensure_list(climate.validate_climate_fan_mode),
-            cv.Optional(CONF_CUSTOM_FAN_MODES, default=["VERYHIGH"]): cv.ensure_list(
-                validate_custom_fan_modes
-            ),
-            cv.Optional(CONF_TEMPERATURE_SOURCES, default=[]): cv.ensure_list(
-                cv.use_id(sensor.Sensor)
-            ),
-            cv.Optional(
-                CONF_ACTIVE_MODE_SWITCH, default={"name": "Active Mode"}
-            ): switch.switch_schema(
+            cv.Optional(CONF_SUPPORTED_MODES, default=DEFAULT_CLIMATE_MODES):
+                cv.ensure_list(climate.validate_climate_mode),
+            cv.Optional(CONF_SUPPORTED_FAN_MODES, default=DEFAULT_FAN_MODES):
+                cv.ensure_list(climate.validate_climate_fan_mode),
+            cv.Optional(CONF_CUSTOM_FAN_MODES, default=["VERYHIGH"]):
+                cv.ensure_list(validate_custom_fan_modes),
+            cv.Optional(CONF_TEMPERATURE_SOURCES, default=[]):
+                cv.ensure_list(cv.use_id(sensor.Sensor)),
+            cv.Optional(CONF_ACTIVE_MODE_SWITCH, default={"name": "Active Mode"}): switch.switch_schema(
                 ActiveModeSwitch,
                 entity_category=ENTITY_CATEGORY_CONFIG,
                 default_restore_mode="RESTORE_DEFAULT_ON",
