@@ -109,7 +109,14 @@ class MitsubishiUART : public PollingComponent, public climate::Climate, public 
   void process_packet(const StandbyGetResponsePacket &packet) override;
   void process_packet(const ErrorStateGetResponsePacket &packet) override;
   void process_packet(const RemoteTemperatureSetRequestPacket &packet) override;
+  void process_packet(const KumoThermostatSensorStatusPacket &packet) override;
+  void process_packet(const KumoThermostatHelloPacket &packet) override;
+  void process_packet(const KumoThermostatStateSyncPacket &packet) override;
+  void process_packet(const KumoAASetRequestPacket &packet) override;
   void process_packet(const SetResponsePacket &packet) override;
+
+  void handleAdapterStateGetRequest(const GetRequestPacket &packet);
+  void handleKumoAAGetRequest(const GetRequestPacket &packet);
 
   void do_publish_();
 

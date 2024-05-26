@@ -60,5 +60,11 @@ RawPacket &RawPacket::set_payload_byte(const uint8_t payload_byte_index, const u
   return *this;
 }
 
+RawPacket &RawPacket::setPayloadBytes(const uint8_t begin_index, const void* value, const size_t size) {
+  memcpy(&packetBytes[PACKET_HEADER_SIZE + begin_index], value, size);
+  updateChecksum();
+  return *this;
+}
+
 }  // namespace mitsubishi_uart
 }  // namespace esphome

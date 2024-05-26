@@ -35,11 +35,19 @@ enum class GetCommand : uint8_t {
   ERROR_INFO = 0x04,
   STATUS = 0x06,
   STANDBY = 0x09,
-  A_9 = 0xa9
+  KUMO_GET_ADAPTER_STATE = 0xa9,
+  KUMO_AB = 0xab,
 };
 
 // Used to specify certain packet subtypes
-enum class SetCommand : uint8_t { SETTINGS = 0x01, REMOTE_TEMPERATURE = 0x07, THERMOSTAT_HELLO = 0xa7 };
+enum class SetCommand : uint8_t {
+  SETTINGS = 0x01,
+  REMOTE_TEMPERATURE = 0x07,
+  KUMO_SENSOR_STATUS = 0xA6,
+  KUMO_THERMOSTAT_HELLO = 0xa7,
+  KUMO_THERMOSTAT_STATE_SYNC = 0xa8,
+  KUMO_AA = 0xaa,
+};
 
 // Which MUARTBridge was the packet read from (used to determine flow direction of the packet)
 enum class SourceBridge { NONE, HEATPUMP, THERMOSTAT };
@@ -87,9 +95,11 @@ class RawPacket {
   ControllerAssociation get_controller_association() const { return controller_association_; };
 
   RawPacket &set_payload_byte(uint8_t payload_byte_index, uint8_t value);
+  RawPacket &set_payload_bytes(uint8_t begin_index, const void *value, size_t size);
   uint8_t get_payload_byte(const uint8_t payload_byte_index) const {
     return packet_bytes_[PACKET_HEADER_SIZE + payload_byte_index];
   };
+  const uint8_t *get_payload_bytes(size_t startIndex = 0) const { return &packet_bytes_[PACKET_HEADER_SIZE + startIndex]; }
 
  private:
   static const int PLINDEX_COMMAND = 0;

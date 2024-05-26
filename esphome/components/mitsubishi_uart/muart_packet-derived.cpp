@@ -1,6 +1,7 @@
 #include "muart_packet.h"
 #include "muart_utils.h"
 #include "mitsubishi_uart.h"
+#include "esphome/core/datatypes.h"
 
 namespace esphome {
 namespace mitsubishi_uart {
@@ -64,9 +65,25 @@ std::string RemoteTemperatureSetRequestPacket::to_string() const {
           "\n Temp:" + std::to_string(get_remote_temperature()));
 }
 
-std::string ThermostatHelloRequestPacket::to_string() const {
-  return ("Thermostat Hello: " + Packet::to_string() + CONSOLE_COLOR_PURPLE + "\n Model: " + get_thermostat_model() +
+std::string KumoThermostatSensorStatusPacket::to_string() const {
+  return ("Kumo Thermostat Sensor Status: " + Packet::to_string() + CONSOLE_COLOR_PURPLE +
+          "\n Indoor RH: " + std::to_string(get_indoor_humidity_percent()) + "%" + "  MHK Battery: " +
+          std::to_string(get_thermostat_battery_state()) + "  Sensor Flags: " + std::to_string(get_sensor_flags()));
+}
+
+std::string KumoThermostatHelloPacket::to_string() const {
+  return ("Kumo Thermostat Hello: " + Packet::to_string() + CONSOLE_COLOR_PURPLE + "\n Model: " + get_thermostat_model() +
           " Serial: " + get_thermostat_serial() + " Version: " + get_thermostat_version_string());
+}
+
+std::string KumoThermostatStateSyncPacket::to_string() const {
+  ESPTime timestamp{};
+  get_thermostat_timestamp(&timestamp);
+
+  return ("Kumo Thermostat Sync: " + Packet::to_string() + CONSOLE_COLOR_PURPLE +
+          "\n Flags: " + std::to_string(getFlags()) + " TS Time:" + timestamp.strftime("%Y-%m-%d %H:%M:%S") +
+          " CoolSetpoint: " + std::to_string(get_auto_cool_setpoint()) +
+          " HeatSetpoint: " + std::to_string(get_auto_heat_setpoint()));
 }
 
 // TODO: Are there function implementations for packets in the .h file? (Yes)  Should they be here?
@@ -191,20 +208,69 @@ float CurrentTempGetResponsePacket::get_current_temp() const {
   return MUARTUtils::temp_scale_a_to_deg_c(enhanced_raw_temp);
 }
 
-// ThermostatHelloRequestPacket functions
-std::string ThermostatHelloRequestPacket::get_thermostat_model() const {
+// KumoThermostatHelloPacket functions
+std::string KumoThermostatHelloPacket::get_thermostat_model() const {
   return MUARTUtils::decode_n_bit_string((pkt_.get_bytes() + 1), 3, 6);
 }
 
-std::string ThermostatHelloRequestPacket::get_thermostat_serial() const {
+std::string KumoThermostatHelloPacket::get_thermostat_serial() const {
   return MUARTUtils::decode_n_bit_string((pkt_.get_bytes() + 4), 8, 6);
 }
 
-std::string ThermostatHelloRequestPacket::get_thermostat_version_string() const {
+std::string KumoThermostatHelloPacket::get_thermostat_version_string() const {
   char buf[16];
   sprintf(buf, "%02d.%02d.%02d", pkt_.get_payload_byte(13), pkt_.get_payload_byte(14), pkt_.get_payload_byte(15));
 
   return buf;
+}
+
+// KumoThermostatStateSyncPacket functions
+int32_t KumoThermostatStateSyncPacket::get_thermostat_timestamp(esphome::ESPTime *outTimestamp) const {
+  int32_be_t magic;
+  std::memcpy(&magic, pkt_.getPayloadBytes(PLINDEX_THERMOSTAT_TIMESTAMP), 4);
+
+  outTimestamp->second = magic & 63;
+  outTimestamp->minute = (magic >> 6) & 63;
+  outTimestamp->hour = (magic >> 12) & 31;
+  outTimestamp->day_of_month = (magic >> 17) & 31;
+  outTimestamp->month = (magic >> 22) & 15;
+  outTimestamp->year = (magic >> 26) + 2017;
+
+  outTimestamp->recalc_timestamp_local();
+  return outTimestamp->timestamp;
+}
+
+float KumoThermostatStateSyncPacket::get_auto_heat_setpoint() const {
+  uint8_t enhancedRawTemp = pkt_.get_payload_byte(PLINDEX_AUTO_HEAT_SETPOINT);
+  return MUARTUtils::temp_scale_a_to_deg_c(enhancedRawTemp);
+}
+
+float KumoThermostatStateSyncPacket::get_auto_cool_setpoint() const {
+  uint8_t enhancedRawTemp = pkt_.get_payload_byte(PLINDEX_AUTO_COOL_SETPOINT);
+  return MUARTUtils::temp_scale_a_to_deg_c(enhancedRawTemp);
+}
+
+// KumoCloudStateSyncPacket functions
+KumoCloudStateSyncPacket &KumoCloudStateSyncPacket::set_timestamp(esphome::ESPTime ts) {
+  int32_t encodedTimestamp = ((ts.year - 2017) << 26) | (ts.month << 22) | (ts.day_of_month << 17) |
+                                    (ts.hour << 12) | (ts.minute << 6) | (ts.second);
+
+  int32_t swappedTimestamp = byteswap(encodedTimestamp);
+
+  pkt_.set_payload_bytes(PLINDEX_KUMOCLOUD_TIMESTAMP, &swappedTimestamp, 4);
+  pkt_.set_payload_byte(10, 0x07);  // ???
+
+  return *this;
+}
+
+KumoCloudStateSyncPacket &KumoCloudStateSyncPacket::set_auto_heat_setpoint(float highTemp) {
+  pkt_.set_payload_byte(PLINDEX_AUTO_HEAT_SETPOINT, MUARTUtils::deg_c_to_temp_scale_a(highTemp));
+  return *this;
+}
+
+KumoCloudStateSyncPacket &KumoCloudStateSyncPacket::set_auto_cool_setpoint(float lowTemp) {
+  pkt_.set_payload_byte(PLINDEX_AUTO_COOL_SETPOINT, MUARTUtils::deg_c_to_temp_scale_a(lowTemp));
+  return *this;
 }
 
 // ErrorStateGetResponsePacket functions

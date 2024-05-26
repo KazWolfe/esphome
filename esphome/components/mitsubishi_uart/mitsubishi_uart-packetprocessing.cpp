@@ -54,10 +54,17 @@ void MitsubishiUART::process_packet(const ExtendedConnectResponsePacket &packet)
 
 void MitsubishiUART::process_packet(const GetRequestPacket &packet) {
   ESP_LOGV(TAG, "Processing %s", packet.to_string().c_str());
-  route_packet_(packet);
-  // These are just requests for information from the thermostat.  For now, nothing to be done
-  // except route them.  In the future, we could use this to inject information for the thermostat
-  // or use a cached value.
+
+  switch (packet.getRequestedCommand()) {
+    case GetCommand::kumo_get_adapter_state:
+      this->handle_adapter_state_get_request(packet);
+      break;
+    case GetCommand::kumo_ab:
+      this->handle_kumo_aa_get_request(packet);
+      break;
+    default:
+      route_packet_(packet);
+  }
 }
 
 void MitsubishiUART::process_packet(const SettingsGetResponsePacket &packet) {
@@ -347,11 +354,58 @@ void MitsubishiUART::process_packet(const RemoteTemperatureSetRequestPacket &pac
 
     publish_on_update_ |= (old_thermostat_temp != thermostat_temperature_sensor_->raw_state);
   }
-};
+}
+
+void MitsubishiUART::process_packet(const KumoThermostatSensorStatusPacket &packet) {
+  ESP_LOGV(TAG, "Processing inbound KumoThermostatSensorStatusPacket: %s", packet.to_string().c_str());
+
+  ts_bridge_->send_packet(SetResponsePacket());
+}
+
+void MitsubishiUART::process_packet(const KumoThermostatHelloPacket &packet) {
+  ESP_LOGV(TAG, "Processing inbound KumoThermostatHelloPacket: %s", packet.to_string().c_str());
+
+  ts_bridge_->send_packet(SetResponsePacket());
+}
+
+void MitsubishiUART::process_packet(const KumoThermostatStateSyncPacket &packet) {
+  ESP_LOGV(TAG, "Processing inbound KumoThermostatStateSyncPacket: %s", packet.to_string().c_str());
+
+  this->target_temperature_low = packet.get_auto_cool_setpoint();
+  this->target_temperature_high = packet.get_auto_heat_setpoint();
+
+  ts_bridge_->send_packet(SetResponsePacket());
+}
+
+void MitsubishiUART::process_packet(const KumoAASetRequestPacket &packet) {
+  ESP_LOGV(TAG, "Processing inbound KumoAASetRequestPacket: %s", packet.to_string().c_str());
+
+  ts_bridge_->send_packet(SetResponsePacket());
+}
+
 void MitsubishiUART::process_packet(const SetResponsePacket &packet) {
-  ESP_LOGV(TAG, "Got Set Response packet, success = %s (code = %x)", packet.is_successful() ? "true" : "false",
+  ESP_LOGV(TAG, "Got Set Response packet, success = %s (code = %x)", packet.isSuccessful() ? "true" : "false",
            packet.get_result_code());
   route_packet_(packet);
+}
+
+// Process incoming data requests (Kumo)
+void MitsubishiUART::handle_adapter_state_get_request(const GetRequestPacket &packet) {
+  auto response = KumoCloudStateSyncPacket();
+
+  response.setAutoHeatSetpoint(this->target_temperature_high);
+  response.setAutoCoolSetpoint(this->target_temperature_low);
+
+  ESPTime stub { .second = 45, .minute = 57, .hour = 18, .day_of_month = 25, .month = 5, .year = 2024 };
+  response.setTimestamp(stub);
+
+  ts_bridge_->send_packet(response);
+}
+
+void MitsubishiUART::handle_kumo_aa_get_request(const GetRequestPacket &packet) {
+  auto response = KumoABGetRequestPacket();
+
+  ts_bridge_->send_packet(response);
 }
 
 }  // namespace mitsubishi_uart
