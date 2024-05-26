@@ -184,6 +184,11 @@ void MitsubishiUART::do_publish_() {
     ESP_LOGI(TAG, "Thermostat temp differs, do publish");
     thermostat_temperature_sensor_->publish_state(thermostat_temperature_sensor_->raw_state);
   }
+  if (thermostat_humidity_sensor &&
+      (thermostat_humidity_sensor->raw_state != thermostat_humidity_sensor->state)) {
+    ESP_LOGI(TAG, "Thermostat humidity differs, do publish");
+    thermostat_humidity_sensor->publish_state(thermostat_humidity_sensor->raw_state);
+  }
   if (compressor_frequency_sensor_ &&
       (compressor_frequency_sensor_->raw_state != compressor_frequency_sensor_->state)) {
     ESP_LOGI(TAG, "Compressor frequency differs, do publish");

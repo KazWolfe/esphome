@@ -359,6 +359,12 @@ void MitsubishiUART::process_packet(const RemoteTemperatureSetRequestPacket &pac
 void MitsubishiUART::process_packet(const KumoThermostatSensorStatusPacket &packet) {
   ESP_LOGV(TAG, "Processing inbound KumoThermostatSensorStatusPacket: %s", packet.to_string().c_str());
 
+  if (thermostat_humidity_sensor_) {
+    const float old_humidity = thermostat_humidity_sensor_->raw_state;
+    thermostat_humidity_sensor_->raw_state = packet.get_indoor_humidity_percent();
+    publish_on_update_ |= (old_humidity != thermostat_humidity_sensor_->raw_state);
+  }
+
   ts_bridge_->send_packet(SetResponsePacket());
 }
 

@@ -69,6 +69,7 @@ class MitsubishiUART : public PollingComponent, public climate::Climate, public 
 
   // Sensor setters
   void set_thermostat_temperature_sensor(sensor::Sensor *sensor) { thermostat_temperature_sensor_ = sensor; };
+  void set_thermostat_humidity_sensor(sensor::Sensor *sensor) { thermostat_humidity_sensor_ = sensor; }
   void set_compressor_frequency_sensor(sensor::Sensor *sensor) { compressor_frequency_sensor_ = sensor; };
   void set_actual_fan_sensor(text_sensor::TextSensor *sensor) { actual_fan_sensor_ = sensor; };
   void set_service_filter_sensor(binary_sensor::BinarySensor *sensor) { service_filter_sensor_ = sensor; };
@@ -166,6 +167,7 @@ class MitsubishiUART : public PollingComponent, public climate::Climate, public 
 
   // Internal sensors
   sensor::Sensor *thermostat_temperature_sensor_ = nullptr;
+  sensor::Sensor *thermostat_humidity_sensor_ = nullptr;
   sensor::Sensor *compressor_frequency_sensor_ = nullptr;
   text_sensor::TextSensor *actual_fan_sensor_ = nullptr;
   binary_sensor::BinarySensor *service_filter_sensor_ = nullptr;

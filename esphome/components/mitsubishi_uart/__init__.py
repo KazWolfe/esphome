@@ -19,10 +19,12 @@ from esphome.const import (
     CONF_SUPPORTED_MODES,
     DEVICE_CLASS_TEMPERATURE,
     DEVICE_CLASS_FREQUENCY,
+    DEVICE_CLASS_HUMIDITY,
     ENTITY_CATEGORY_CONFIG,
     STATE_CLASS_MEASUREMENT,
     UNIT_CELSIUS,
     UNIT_HERTZ,
+    UNIT_PERCENT,
 )
 from esphome.core import coroutine
 
@@ -45,6 +47,7 @@ CONF_THERMOSTAT_UART = "thermostat_uart"
 CONF_TIME_SOURCE = "time_source"
 
 CONF_THERMOSTAT_TEMPERATURE = "thermostat_temperature"
+CONF_THERMOSTAT_HUMIDITY = "thermostat_humidity"
 CONF_ERROR_CODE = "error_code"
 CONF_ISEE_STATUS = "isee_status"
 
@@ -136,6 +139,16 @@ SENSORS = dict[str, tuple[str, cv.Schema, callable]](
                 accuracy_decimals=1,
             ),
             sensor.register_sensor,
+        ),
+        CONF_THERMOSTAT_HUMIDITY: (
+            "Thermostat Humidity",
+            sensor.sensor_schema(
+                unit_of_measurement=UNIT_PERCENT,
+                device_class=DEVICE_CLASS_HUMIDITY,
+                state_class=STATE_CLASS_MEASUREMENT,
+                accuracy_decimals=0,
+            ),
+            sensor.register_sensor
         ),
         "compressor_frequency": (
             "Compressor Frequency",
@@ -295,9 +308,8 @@ async def to_code(config):
         registration_function,
     ) in SENSORS.items():
         # Only add the thermostat temp if we have a TS_UART
-        if (sensor_designator == CONF_THERMOSTAT_TEMPERATURE) and (
-            CONF_THERMOSTAT_UART not in config
-        ):
+        if ((CONF_THERMOSTAT_UART not in config) and
+                (sensor_designator in [CONF_THERMOSTAT_TEMPERATURE, CONF_THERMOSTAT_HUMIDITY])):
             continue
 
         sensor_conf = config[CONF_SENSORS][sensor_designator]
