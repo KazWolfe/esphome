@@ -210,11 +210,11 @@ float CurrentTempGetResponsePacket::get_current_temp() const {
 
 // KumoThermostatHelloPacket functions
 std::string KumoThermostatHelloPacket::get_thermostat_model() const {
-  return MUARTUtils::decode_n_bit_string((pkt_.get_bytes() + 1), 3, 6);
+  return MUARTUtils::decode_n_bit_string((pkt_.get_payload_bytes(1)), 4, 6);
 }
 
 std::string KumoThermostatHelloPacket::get_thermostat_serial() const {
-  return MUARTUtils::decode_n_bit_string((pkt_.get_bytes() + 4), 8, 6);
+  return MUARTUtils::decode_n_bit_string((pkt_.get_payload_bytes(4)), 12, 6);
 }
 
 std::string KumoThermostatHelloPacket::get_thermostat_version_string() const {
