@@ -371,8 +371,8 @@ void MitsubishiUART::process_packet(const KumoThermostatHelloPacket &packet) {
 void MitsubishiUART::process_packet(const KumoThermostatStateSyncPacket &packet) {
   ESP_LOGV(TAG, "Processing inbound KumoThermostatStateSyncPacket: %s", packet.to_string().c_str());
 
-  this->target_temperature_low = packet.get_auto_cool_setpoint();
-  this->target_temperature_high = packet.get_auto_heat_setpoint();
+  if (packet.getFlags() & 0x08) this->target_temperature_low = packet.get_auto_cool_setpoint();
+  if (packet.getFlags() & 0x10) this->target_temperature_high = packet.get_auto_heat_setpoint();
 
   ts_bridge_->send_packet(SetResponsePacket());
 }
@@ -384,7 +384,7 @@ void MitsubishiUART::process_packet(const KumoAASetRequestPacket &packet) {
 }
 
 void MitsubishiUART::process_packet(const SetResponsePacket &packet) {
-  ESP_LOGV(TAG, "Got Set Response packet, success = %s (code = %x)", packet.isSuccessful() ? "true" : "false",
+  ESP_LOGV(TAG, "Got Set Response packet, success = %s (code = %x)", packet.is_successful() ? "true" : "false",
            packet.get_result_code());
   route_packet_(packet);
 }
@@ -393,14 +393,14 @@ void MitsubishiUART::process_packet(const SetResponsePacket &packet) {
 void MitsubishiUART::handle_adapter_state_get_request(const GetRequestPacket &packet) {
   auto response = KumoCloudStateSyncPacket();
 
-  response.setAutoHeatSetpoint(this->target_temperature_high);
-  response.setAutoCoolSetpoint(this->target_temperature_low);
+  response.set_auto_heat_setpoint(this->target_temperature_high);
+  response.set_auto_cool_setpoint(this->target_temperature_low);
 
   if (this->time_source != nullptr) {
-    response.setTimestamp(this->time_source->now());
+    response.set_timestamp(this->time_source->now());
   } else {
     ESP_LOGW(TAG, "No time source specified. Cannot provide accurate time!");
-    response.setTimestamp(ESPTime::from_epoch_utc(1704067200)); // 2024-01-01 00:00:00 Z
+    response.set_timestamp(ESPTime::from_epoch_utc(1704067200)); // 2024-01-01 00:00:00 Z
   }
 
   ts_bridge_->send_packet(response);
