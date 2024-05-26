@@ -357,7 +357,7 @@ void MitsubishiUART::process_packet(const RemoteTemperatureSetRequestPacket &pac
 }
 
 void MitsubishiUART::process_packet(const KumoThermostatSensorStatusPacket &packet) {
-  ESP_LOGV(TAG, "Processing inbound KumoThermostatSensorStatusPacket: %s", packet.to_string().c_str());
+  ESP_LOGV(TAG, "Processing inbound %s", packet.to_string().c_str());
 
   if (thermostat_humidity_sensor_ && packet.get_flags() & 0x04) {
     const float old_humidity = thermostat_humidity_sensor_->raw_state;
@@ -375,13 +375,13 @@ void MitsubishiUART::process_packet(const KumoThermostatSensorStatusPacket &pack
 }
 
 void MitsubishiUART::process_packet(const KumoThermostatHelloPacket &packet) {
-  ESP_LOGV(TAG, "Processing inbound KumoThermostatHelloPacket: %s", packet.to_string().c_str());
+  ESP_LOGV(TAG, "Processing inbound %s", packet.to_string().c_str());
 
   ts_bridge_->send_packet(SetResponsePacket());
 }
 
 void MitsubishiUART::process_packet(const KumoThermostatStateSyncPacket &packet) {
-  ESP_LOGV(TAG, "Processing inbound KumoThermostatStateSyncPacket: %s", packet.to_string().c_str());
+  ESP_LOGV(TAG, "Processing inbound %s", packet.to_string().c_str());
 
   if (this->traits().get_supports_two_point_target_temperature()) {
     if (packet.getFlags() & 0x08) this->target_temperature_low = packet.get_auto_cool_setpoint();
