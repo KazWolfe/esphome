@@ -67,8 +67,10 @@ std::string RemoteTemperatureSetRequestPacket::to_string() const {
 
 std::string KumoThermostatSensorStatusPacket::to_string() const {
   return ("Kumo Thermostat Sensor Status: " + Packet::to_string() + CONSOLE_COLOR_PURPLE +
-          "\n Indoor RH: " + std::to_string(get_indoor_humidity_percent()) + "%" + "  MHK Battery: " +
-          std::to_string(get_thermostat_battery_state()) + "  Sensor Flags: " + std::to_string(get_sensor_flags()));
+          "\n Indoor RH: " + std::to_string(get_indoor_humidity_percent()) + "%" +
+          "  MHK Battery: " + THERMOSTAT_BATTERY_STATE_NAMES[get_thermostat_battery_state()] +
+          "(" + std::to_string(get_thermostat_battery_state()) + ")" +
+          "  Sensor Flags: " + std::to_string(get_sensor_flags()));
 }
 
 std::string KumoThermostatHelloPacket::to_string() const {

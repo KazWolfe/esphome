@@ -202,6 +202,10 @@ void MitsubishiUART::do_publish_() {
     ESP_LOGI(TAG, "Error code state differs, do publish");
     error_code_sensor_->publish_state(error_code_sensor_->raw_state);
   }
+  if (thermostat_battery_sensor_ && (thermostat_battery_sensor_->raw_state != thermostat_battery_sensor_->state)) {
+    ESP_LOGI(TAG, "Thermostat battery state differs, do publish");
+    thermostat_battery_sensor_->publish_state(thermostat_battery_sensor_->raw_state);
+  }
 
   // Binary sensors automatically dedup publishes (I think) and so will only actually publish on change
   service_filter_sensor_->publish_state(service_filter_sensor_->state);

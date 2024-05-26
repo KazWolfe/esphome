@@ -33,6 +33,8 @@ const std::string TEMPERATURE_SOURCE_THERMOSTAT = "Thermostat";
 const std::array<std::string, 7> ACTUAL_FAN_SPEED_NAMES = {"Off",      "Very Low",       "Quiet",      "Low",
                                                            "Powerful", "Super Powerful", "Super Quiet"};
 
+const std::array<std::string, 5> THERMOSTAT_BATTERY_STATE_NAMES = {"OK", "Low", "Critical", "Replace", "Unknown"};
+
 class MitsubishiUART : public PollingComponent, public climate::Climate, public PacketProcessor {
  public:
   /**
@@ -78,6 +80,7 @@ class MitsubishiUART : public PollingComponent, public climate::Climate, public 
   void set_standby_sensor(binary_sensor::BinarySensor *sensor) { standby_sensor_ = sensor; };
   void set_isee_status_sensor(binary_sensor::BinarySensor *sensor) { isee_status_sensor_ = sensor; }
   void set_error_code_sensor(text_sensor::TextSensor *sensor) { error_code_sensor_ = sensor; };
+  void set_thermostat_battery_sensor(text_sensor::TextSensor *sensor) { thermostat_battery_sensor_ = sensor; }
 
   // Select setters
   void set_temperature_source_select(select::Select *select) { temperature_source_select_ = select; };
@@ -119,8 +122,8 @@ class MitsubishiUART : public PollingComponent, public climate::Climate, public 
   void process_packet(const KumoAASetRequestPacket &packet) override;
   void process_packet(const SetResponsePacket &packet) override;
 
-  void handle_kumo_adapter_state_get_request(const GetRequestPacket &packet);
-  void handle_kumo_aa_get_request(const GetRequestPacket &packet);
+  void handle_kumo_adapter_state_get_request(const GetRequestPacket &packet) override;
+  void handle_kumo_aa_get_request(const GetRequestPacket &packet) override;
 
   void do_publish_();
 
@@ -176,6 +179,7 @@ class MitsubishiUART : public PollingComponent, public climate::Climate, public 
   binary_sensor::BinarySensor *standby_sensor_ = nullptr;
   binary_sensor::BinarySensor *isee_status_sensor_ = nullptr;
   text_sensor::TextSensor *error_code_sensor_ = nullptr;
+  text_sensor::TextSensor *thermostat_battery_sensor_ = nullptr;
 
   // Selects
   select::Select *temperature_source_select_;

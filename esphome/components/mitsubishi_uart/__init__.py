@@ -48,6 +48,7 @@ CONF_TIME_SOURCE = "time_source"
 
 CONF_THERMOSTAT_TEMPERATURE = "thermostat_temperature"
 CONF_THERMOSTAT_HUMIDITY = "thermostat_humidity"
+CONF_THERMOSTAT_BATTERY = "thermostat_battery"
 CONF_ERROR_CODE = "error_code"
 CONF_ISEE_STATUS = "isee_status"
 
@@ -143,6 +144,13 @@ SENSORS = dict[str, tuple[str, cv.Schema, callable]](
                 accuracy_decimals=0,
             ),
             sensor.register_sensor
+        ),
+        CONF_THERMOSTAT_BATTERY: (
+            "Thermostat Battery",
+            text_sensor.text_sensor_schema(
+                icon="mdi:battery",
+            ),
+            text_sensor.register_text_sensor
         ),
         "compressor_frequency": (
             "Compressor Frequency",
@@ -279,8 +287,8 @@ async def to_code(config):
     if CONF_TIME_SOURCE in config:
         rtc_component = await cg.get_variable(config[CONF_TIME_SOURCE])
         cg.add(getattr(muart_component, "set_time_source")(rtc_component))
-    elif CONF_THERMOSTAT_UART_UART in config:
-        raise cv.RequiredFieldInvalid(f"{CONF_TIME_SOURCE} is required if {CONF_TS_UART} is set.")
+    elif CONF_THERMOSTAT_UART in config:
+        raise cv.RequiredFieldInvalid(f"{CONF_TIME_SOURCE} is required if {CONF_THERMOSTAT_UART} is set.")
 
     # Traits
     traits = muart_component.config_traits()
@@ -303,7 +311,7 @@ async def to_code(config):
     ) in SENSORS.items():
         # Only add the thermostat temp if we have a TS_UART
         if ((CONF_THERMOSTAT_UART not in config) and
-                (sensor_designator in [CONF_THERMOSTAT_TEMPERATURE, CONF_THERMOSTAT_HUMIDITY])):
+                (sensor_designator in [CONF_THERMOSTAT_TEMPERATURE, CONF_THERMOSTAT_HUMIDITY, CONF_THERMOSTAT_BATTERY])):
             continue
 
         sensor_conf = config[CONF_SENSORS][sensor_designator]
