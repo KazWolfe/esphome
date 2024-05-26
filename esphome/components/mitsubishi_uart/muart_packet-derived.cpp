@@ -227,7 +227,7 @@ std::string KumoThermostatHelloPacket::get_thermostat_version_string() const {
 // KumoThermostatStateSyncPacket functions
 int32_t KumoThermostatStateSyncPacket::get_thermostat_timestamp(esphome::ESPTime *outTimestamp) const {
   int32_be_t magic;
-  std::memcpy(&magic, pkt_.getPayloadBytes(PLINDEX_THERMOSTAT_TIMESTAMP), 4);
+  std::memcpy(&magic, pkt_.get_payload_bytes(PLINDEX_THERMOSTAT_TIMESTAMP), 4);
 
   outTimestamp->second = magic & 63;
   outTimestamp->minute = (magic >> 6) & 63;

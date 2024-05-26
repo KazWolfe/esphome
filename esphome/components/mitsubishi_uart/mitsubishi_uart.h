@@ -119,8 +119,8 @@ class MitsubishiUART : public PollingComponent, public climate::Climate, public 
   void process_packet(const KumoAASetRequestPacket &packet) override;
   void process_packet(const SetResponsePacket &packet) override;
 
-  void handleAdapterStateGetRequest(const GetRequestPacket &packet);
-  void handleKumoAAGetRequest(const GetRequestPacket &packet);
+  void handle_kumo_adapter_state_get_request(const GetRequestPacket &packet);
+  void handle_kumo_aa_get_request(const GetRequestPacket &packet);
 
   void do_publish_();
 

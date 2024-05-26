@@ -55,11 +55,11 @@ void MitsubishiUART::process_packet(const ExtendedConnectResponsePacket &packet)
 void MitsubishiUART::process_packet(const GetRequestPacket &packet) {
   ESP_LOGV(TAG, "Processing %s", packet.to_string().c_str());
 
-  switch (packet.getRequestedCommand()) {
-    case GetCommand::kumo_get_adapter_state:
-      this->handle_adapter_state_get_request(packet);
+  switch (packet.get_requested_command()) {
+    case GetCommand::KUMO_GET_ADAPTER_STATE:
+      this->handle_kumo_adapter_state_get_request(packet);
       break;
-    case GetCommand::kumo_ab:
+    case GetCommand::KUMO_AB:
       this->handle_kumo_aa_get_request(packet);
       break;
     default:
@@ -396,7 +396,7 @@ void MitsubishiUART::process_packet(const SetResponsePacket &packet) {
 }
 
 // Process incoming data requests (Kumo)
-void MitsubishiUART::handle_adapter_state_get_request(const GetRequestPacket &packet) {
+void MitsubishiUART::handle_kumo_adapter_state_get_request(const GetRequestPacket &packet) {
   auto response = KumoCloudStateSyncPacket();
 
   response.set_auto_heat_setpoint(this->target_temperature_high);

@@ -174,7 +174,7 @@ class GetRequestPacket : public Packet {
   }
   using Packet::Packet;
 
-  GetCommand get_requested_command() const { return (GetCommand) pkt_.getPayloadByte(0); }
+  GetCommand get_requested_command() const { return (GetCommand) pkt_.get_payload_byte(0); }
 
  private:
   GetRequestPacket(GetCommand get_command) : Packet(RawPacket(PacketType::GET_REQUEST, 1)) {
@@ -384,11 +384,11 @@ class KumoThermostatSensorStatusPacket : public Packet {
   };
 
   KumoThermostatSensorStatusPacket() : Packet(RawPacket(PacketType::SET_REQUEST, 16)) {
-    pkt_.set_payload_byte(0, static_cast<uint8_t>(SetCommand::KUMO_THERMOSTAT_STATUS));
+    pkt_.set_payload_byte(0, static_cast<uint8_t>(SetCommand::KUMO_THERMOSTAT_SENSOR_STATUS));
   }
 
   uint8_t get_indoor_humidity_percent() const { return pkt_.get_payload_byte(5); }
-  ThermostatBatteryState get_thermostat_battery_state() const { return (ThermostatBatteryState) pkt_.getPayloadByte(6); }
+  ThermostatBatteryState get_thermostat_battery_state() const { return (ThermostatBatteryState) pkt_.get_payload_byte(6); }
   uint8_t get_sensor_flags() const { return pkt_.get_payload_byte(7); }
 
   std::string to_string() const override;
@@ -399,8 +399,8 @@ class KumoThermostatHelloPacket : public Packet {
   using Packet::Packet;
 
  public:
-  KumoThermostatHelloPacket() : Packet(RawPacket(PacketType::set_request, 16)) {
-    pkt_.set_payload_byte(0, static_cast<uint8_t>(SetCommand::kumo_thermostat_hello));
+  KumoThermostatHelloPacket() : Packet(RawPacket(PacketType::SET_REQUEST, 16)) {
+    pkt_.set_payload_byte(0, static_cast<uint8_t>(SetCommand::KUMO_THERMOSTAT_HELLO));
   }
 
   std::string get_thermostat_model() const;
@@ -419,8 +419,8 @@ class KumoThermostatStateSyncPacket : public Packet {
   using Packet::Packet;
 
  public:
-  KumoThermostatStateSyncPacket() : Packet(RawPacket(PacketType::set_request, 16)) {
-    pkt_.set_payload_byte(0, static_cast<uint8_t>(SetCommand::kumo_thermostat_state_sync));
+  KumoThermostatStateSyncPacket() : Packet(RawPacket(PacketType::SET_REQUEST, 16)) {
+    pkt_.set_payload_byte(0, static_cast<uint8_t>(SetCommand::KUMO_THERMOSTAT_STATE_SYNC));
   }
 
   int32_t getFlags() const { return pkt_.get_payload_byte(PLINDEX_FLAGS); }
@@ -453,8 +453,8 @@ class KumoAASetRequestPacket : public Packet {
   using Packet::Packet;
 
  public:
-  KumoAASetRequestPacket() : Packet(RawPacket(PacketType::set_request, 16)) {
-    pkt_.set_payload_byte(0, static_cast<uint8_t>(SetCommand::kumo_aa));
+  KumoAASetRequestPacket() : Packet(RawPacket(PacketType::SET_REQUEST, 16)) {
+    pkt_.set_payload_byte(0, static_cast<uint8_t>(SetCommand::KUMO_AA));
   }
 };
 
@@ -462,8 +462,8 @@ class KumoABGetRequestPacket : public Packet {
   using Packet::Packet;
 
  public:
-  KumoABGetRequestPacket() : Packet(RawPacket(PacketType::get_response, 16)) {
-    pkt_.set_payload_byte(0, static_cast<uint8_t>(GetCommand::kumo_ab));
+  KumoABGetRequestPacket() : Packet(RawPacket(PacketType::GET_RESPONSE, 16)) {
+    pkt_.set_payload_byte(0, static_cast<uint8_t>(GetCommand::KUMO_AB));
     pkt_.set_payload_byte(1, 1);
   }
 };
@@ -490,8 +490,8 @@ class PacketProcessor {
   virtual void process_packet(const KumoABGetRequestPacket &packet){};
   virtual void process_packet(const SetResponsePacket &packet){};
 
-  virtual void handleAdapterStateGetRequest(const GetRequestPacket &packet){};
-  virtual void handleKumoAAGetRequest(const GetRequestPacket &packet){};
+  virtual void handle_kumo_adapter_state_get_request(const GetRequestPacket &packet){};
+  virtual void handle_kumo_aa_get_request(const GetRequestPacket &packet){};
 };
 
 }  // namespace mitsubishi_uart

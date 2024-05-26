@@ -188,7 +188,7 @@ void MUARTBridge::classify_and_process_raw_packet_(RawPacket &pkt) const {
         case SetCommand::SETTINGS:
           process_raw_packet_<SettingsSetRequestPacket>(pkt, true);
           break;
-        case SetCommand::KUMO_SENSOR_STATUS:
+        case SetCommand::KUMO_THERMOSTAT_SENSOR_STATUS:
           process_raw_packet_<KumoThermostatSensorStatusPacket>(pkt, true);
           break;
         case SetCommand::KUMO_THERMOSTAT_HELLO:

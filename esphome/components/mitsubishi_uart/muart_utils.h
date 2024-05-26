@@ -7,7 +7,7 @@ class MUARTUtils {
  public:
   /// Read a string out of data, wordSize bits at a time.
   /// Used to decode serial numbers and other information from a thermostat.
-  static std::string Decode_n_bit_string(const uint8_t data[], size_t data_length, size_t word_size = 6) {
+  static std::string decode_n_bit_string(const uint8_t data[], size_t data_length, size_t word_size = 6) {
     auto result = std::string();
 
     for (int i = 0; i < data_length; i++) {

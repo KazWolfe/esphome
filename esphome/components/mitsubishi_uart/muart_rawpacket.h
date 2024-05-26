@@ -43,7 +43,7 @@ enum class GetCommand : uint8_t {
 enum class SetCommand : uint8_t {
   SETTINGS = 0x01,
   REMOTE_TEMPERATURE = 0x07,
-  KUMO_SENSOR_STATUS = 0xA6,
+  KUMO_THERMOSTAT_SENSOR_STATUS = 0xA6,
   KUMO_THERMOSTAT_HELLO = 0xa7,
   KUMO_THERMOSTAT_STATE_SYNC = 0xa8,
   KUMO_AA = 0xaa,
