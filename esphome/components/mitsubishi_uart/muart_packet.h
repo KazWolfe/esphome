@@ -426,10 +426,17 @@ class KumoThermostatHelloPacket : public Packet {
 };
 
 class KumoThermostatStateSyncPacket : public Packet {
-  static const uint8_t PLINDEX_FLAGS = 1;
+  // Packet 0x41 - AG 0xA8
+
   static const uint8_t PLINDEX_THERMOSTAT_TIMESTAMP = 2;
-  static const uint8_t PLINDEX_AUTO_HEAT_SETPOINT = 8;
-  static const uint8_t PLINDEX_AUTO_COOL_SETPOINT = 9;
+  static const uint8_t PLINDEX_HEAT_SETPOINT = 8;
+  static const uint8_t PLINDEX_COOL_SETPOINT = 9;
+
+  enum TSStateSyncFlags : uint8_t {
+    TSSF_TIMESTAMP = 0x01,
+    TSSF_HEAT_SETPOINT = 0x08,
+    TSSF_COOL_SETPOINT = 0x10,
+  };
 
   using Packet::Packet;
 
@@ -438,19 +445,17 @@ class KumoThermostatStateSyncPacket : public Packet {
     pkt_.set_payload_byte(0, static_cast<uint8_t>(SetCommand::KUMO_THERMOSTAT_STATE_SYNC));
   }
 
-  int32_t getFlags() const { return pkt_.get_payload_byte(PLINDEX_FLAGS); }
-
   int32_t get_thermostat_timestamp(ESPTime* outTimestamp) const;
-  float get_auto_heat_setpoint() const;
-  float get_auto_cool_setpoint() const;
+  float get_heat_setpoint() const;
+  float get_cool_setpoint() const;
 
   std::string to_string() const override;
 };
 
 class KumoCloudStateSyncPacket : public Packet {
   static const uint8_t PLINDEX_KUMOCLOUD_TIMESTAMP = 1;
-  static const uint8_t PLINDEX_AUTO_HEAT_SETPOINT = 7;
-  static const uint8_t PLINDEX_AUTO_COOL_SETPOINT = 8;
+  static const uint8_t PLINDEX_HEAT_SETPOINT = 7;
+  static const uint8_t PLINDEX_COOL_SETPOINT = 8;
 
   using Packet::Packet;
 
@@ -460,8 +465,8 @@ class KumoCloudStateSyncPacket : public Packet {
   }
 
   KumoCloudStateSyncPacket &set_timestamp(ESPTime ts);
-  KumoCloudStateSyncPacket &set_auto_heat_setpoint(float highTemp);
-  KumoCloudStateSyncPacket &set_auto_cool_setpoint(float lowTemp);
+  KumoCloudStateSyncPacket &set_heat_setpoint(float highTemp);
+  KumoCloudStateSyncPacket &set_cool_setpoint(float lowTemp);
 };
 
 class KumoAASetRequestPacket : public Packet {

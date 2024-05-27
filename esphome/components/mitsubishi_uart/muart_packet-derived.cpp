@@ -79,13 +79,22 @@ std::string KumoThermostatHelloPacket::to_string() const {
 }
 
 std::string KumoThermostatStateSyncPacket::to_string() const {
-  ESPTime timestamp{};
-  get_thermostat_timestamp(&timestamp);
+  uint8_t flags = get_flags();
 
-  return ("Kumo Thermostat Sync: " + Packet::to_string() + CONSOLE_COLOR_PURPLE +
-          "\n Flags: " + std::to_string(getFlags()) + " TS Time:" + timestamp.strftime("%Y-%m-%d %H:%M:%S") +
-          " CoolSetpoint: " + std::to_string(get_auto_cool_setpoint()) +
-          " HeatSetpoint: " + std::to_string(get_auto_heat_setpoint()));
+  std::string result = "Kumo Thermostat Sync " + Packet::to_string() + CONSOLE_COLOR_PURPLE +
+                       "\n Flags: " + format_hex(flags) + " =>";
+
+  if (flags & TSSF_TIMESTAMP) {
+    ESPTime timestamp{};
+    get_thermostat_timestamp(&timestamp);
+
+    result += " TS Time: " + timestamp.strftime("%Y-%m-%d %H:%M:%S");
+  }
+
+  if (flags & TSSF_HEAT_SETPOINT) result += " HeatSetpoint: " + std::to_string(get_heat_setpoint());
+  if (flags & TSSF_COOL_SETPOINT) result += " CoolSetpoint: " + std::to_string(get_cool_setpoint());
+
+  return result;
 }
 
 std::string GetRequestPacket::to_string() const {
@@ -98,7 +107,7 @@ std::string SettingsSetRequestPacket::to_string() const {
   uint8_t flags2 = get_flags_2();
 
   std::string result = "Settings Set Request: " + Packet::to_string() + CONSOLE_COLOR_PURPLE +
-                       "\n Flags: " + format_hex(flags) + "Flags2: " + format_hex(flags2);
+                       "\n Flags: " + format_hex(flags2) + format_hex(flags) + " =>";
 
   if (flags & SettingFlag::SF_POWER) result += " Power: " + std::to_string(get_power());
   if (flags & SettingFlag::SF_MODE) result += " Mode: " + std::to_string(get_mode());
@@ -277,13 +286,13 @@ int32_t KumoThermostatStateSyncPacket::get_thermostat_timestamp(esphome::ESPTime
   return outTimestamp->timestamp;
 }
 
-float KumoThermostatStateSyncPacket::get_auto_heat_setpoint() const {
-  uint8_t enhancedRawTemp = pkt_.get_payload_byte(PLINDEX_AUTO_HEAT_SETPOINT);
+float KumoThermostatStateSyncPacket::get_heat_setpoint() const {
+  uint8_t enhancedRawTemp = pkt_.get_payload_byte(PLINDEX_HEAT_SETPOINT);
   return MUARTUtils::temp_scale_a_to_deg_c(enhancedRawTemp);
 }
 
-float KumoThermostatStateSyncPacket::get_auto_cool_setpoint() const {
-  uint8_t enhancedRawTemp = pkt_.get_payload_byte(PLINDEX_AUTO_COOL_SETPOINT);
+float KumoThermostatStateSyncPacket::get_cool_setpoint() const {
+  uint8_t enhancedRawTemp = pkt_.get_payload_byte(PLINDEX_COOL_SETPOINT);
   return MUARTUtils::temp_scale_a_to_deg_c(enhancedRawTemp);
 }
 
@@ -300,13 +309,13 @@ KumoCloudStateSyncPacket &KumoCloudStateSyncPacket::set_timestamp(esphome::ESPTi
   return *this;
 }
 
-KumoCloudStateSyncPacket &KumoCloudStateSyncPacket::set_auto_heat_setpoint(float highTemp) {
-  pkt_.set_payload_byte(PLINDEX_AUTO_HEAT_SETPOINT, MUARTUtils::deg_c_to_temp_scale_a(highTemp));
+KumoCloudStateSyncPacket &KumoCloudStateSyncPacket::set_heat_setpoint(float highTemp) {
+  pkt_.set_payload_byte(PLINDEX_HEAT_SETPOINT, MUARTUtils::deg_c_to_temp_scale_a(highTemp));
   return *this;
 }
 
-KumoCloudStateSyncPacket &KumoCloudStateSyncPacket::set_auto_cool_setpoint(float lowTemp) {
-  pkt_.set_payload_byte(PLINDEX_AUTO_COOL_SETPOINT, MUARTUtils::deg_c_to_temp_scale_a(lowTemp));
+KumoCloudStateSyncPacket &KumoCloudStateSyncPacket::set_cool_setpoint(float lowTemp) {
+  pkt_.set_payload_byte(PLINDEX_COOL_SETPOINT, MUARTUtils::deg_c_to_temp_scale_a(lowTemp));
   return *this;
 }
 
