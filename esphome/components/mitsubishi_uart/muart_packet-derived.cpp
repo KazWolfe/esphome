@@ -88,13 +88,37 @@ std::string KumoThermostatStateSyncPacket::to_string() const {
           " HeatSetpoint: " + std::to_string(get_auto_heat_setpoint()));
 }
 
+std::string GetRequestPacket::to_string() const {
+  return ("Get Request: " + Packet::to_string() + CONSOLE_COLOR_PURPLE +
+          "\n CommandID: " + format_hex((uint8_t) get_requested_command()));
+}
+
+std::string SettingsSetRequestPacket::to_string() const {
+  uint8_t flags = get_flags();
+  uint8_t flags2 = get_flags_2();
+
+  std::string result = "Settings Set Request: " + Packet::to_string() + CONSOLE_COLOR_PURPLE +
+                       "\n Flags: " + format_hex(flags) + "Flags2: " + format_hex(flags2);
+
+  if (flags & SettingFlag::SF_POWER) result += " Power: " + std::to_string(get_power());
+  if (flags & SettingFlag::SF_MODE) result += " Mode: " + std::to_string(get_mode());
+  if (flags & SettingFlag::SF_TARGET_TEMPERATURE) result += " TargetTemp: " + std::to_string(get_target_temp());
+  if (flags & SettingFlag::SF_FAN) result += " Fan: " + std::to_string(get_fan());
+  if (flags & SettingFlag::SF_VANE) result += " Vane: " + std::to_string(get_vane());
+
+  if (flags2 & SettingFlag2::SF2_HORIZONTAL_VANE)
+    result += " HVane: " + std::to_string(get_horizontal_vane()) + (get_horizontal_vane_msb() ? " (MSB Set)" : "");
+
+  return result;
+}
+
 // TODO: Are there function implementations for packets in the .h file? (Yes)  Should they be here?
 
 // SettingsSetRequestPacket functions
 
 void SettingsSetRequestPacket::add_settings_flag_(const SettingFlag flag_to_add) { add_flag(flag_to_add); }
 
-void SettingsSetRequestPacket::add_settings_flag2_(const SettingFlaG2 flag2_to_add) { add_flag2(flag2_to_add); }
+void SettingsSetRequestPacket::add_settings_flag2_(const SettingFlag2 flag2_to_add) { add_flag2(flag2_to_add); }
 
 SettingsSetRequestPacket &SettingsSetRequestPacket::set_power(const bool is_on) {
   pkt_.set_payload_byte(PLINDEX_POWER, is_on ? 0x01 : 0x00);
@@ -145,6 +169,17 @@ SettingsSetRequestPacket &SettingsSetRequestPacket::set_horizontal_vane(const Ho
   pkt_.set_payload_byte(PLINDEX_HORIZONTAL_VANE, horizontal_vane);
   add_settings_flag2_(SF2_HORIZONTAL_VANE);
   return *this;
+}
+
+float SettingsSetRequestPacket::get_target_temp() const {
+  uint8_t enhanced_raw_temp = pkt_.get_payload_byte(PLINDEX_TARGET_TEMPERATURE);
+
+  if (enhanced_raw_temp == 0x00) {
+    uint8_t legacy_raw_temp = pkt_.get_payload_byte(PLINDEX_TARGET_TEMPERATURE_CODE);
+    return MUARTUtils::legacy_target_temp_to_deg_c(legacy_raw_temp);
+  }
+
+  return MUARTUtils::temp_scale_a_to_deg_c(enhanced_raw_temp);
 }
 
 // SettingsGetResponsePacket functions

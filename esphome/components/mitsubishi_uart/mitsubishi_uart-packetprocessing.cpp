@@ -332,6 +332,13 @@ void MitsubishiUART::process_packet(const ErrorStateGetResponsePacket &packet) {
   publish_on_update_ |= (old_error_code != error_code_sensor_->raw_state);
 }
 
+void MitsubishiUART::process_packet(const SettingsSetRequestPacket &packet) {
+  ESP_LOGV(TAG, "Processing %s", packet.to_string().c_str());
+
+  // forward this packet as-is; we're just intercepting to log.
+  route_packet_(packet);
+}
+
 void MitsubishiUART::process_packet(const RemoteTemperatureSetRequestPacket &packet) {
   ESP_LOGV(TAG, "Processing %s", packet.to_string().c_str());
 
