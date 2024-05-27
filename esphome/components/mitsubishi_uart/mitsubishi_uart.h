@@ -194,6 +194,9 @@ class MitsubishiUART : public PollingComponent, public climate::Climate, public 
 
   void send_if_active_(const Packet &packet);
   bool active_mode_ = true;
+
+  float last_cool_setpoint_ = NAN;
+  float last_heat_setpoint_ = NAN;
 };
 
 struct MUARTPreferences {
