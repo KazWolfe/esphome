@@ -390,10 +390,8 @@ void MitsubishiUART::process_packet(const KumoThermostatHelloPacket &packet) {
 void MitsubishiUART::process_packet(const KumoThermostatStateSyncPacket &packet) {
   ESP_LOGV(TAG, "Processing inbound %s", packet.to_string().c_str());
 
-  if (this->traits().get_supports_two_point_target_temperature()) {
-    if (packet.get_flags() & 0x08) this->target_temperature_low = packet.get_heat_setpoint();
-    if (packet.get_flags() & 0x10) this->target_temperature_high = packet.get_cool_setpoint();
-  }
+  if (packet.get_flags() & 0x08) this->target_temperature_low = packet.get_heat_setpoint();
+  if (packet.get_flags() & 0x10) this->target_temperature_high = packet.get_cool_setpoint();
 
   ts_bridge_->send_packet(SetResponsePacket());
 }
@@ -414,10 +412,8 @@ void MitsubishiUART::process_packet(const SetResponsePacket &packet) {
 void MitsubishiUART::handle_kumo_adapter_state_get_request(const GetRequestPacket &packet) {
   auto response = KumoCloudStateSyncPacket();
 
-  if (this->traits().get_supports_two_point_target_temperature()) {
-    response.set_heat_setpoint(this->target_temperature_high);
-    response.set_cool_setpoint(this->target_temperature_low);
-  }
+  response.set_heat_setpoint(this->target_temperature_low);
+  response.set_cool_setpoint(this->target_temperature_high);
 
   if (this->time_source != nullptr) {
     response.set_timestamp(this->time_source->now());

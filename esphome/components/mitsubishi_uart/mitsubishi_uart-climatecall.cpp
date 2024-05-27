@@ -78,6 +78,20 @@ void MitsubishiUART::control(const climate::ClimateCall &call) {
   if (call.get_target_temperature().has_value()) {
     target_temperature = call.get_target_temperature().value();
     set_request_packet.set_target_temperature(call.get_target_temperature().value());
+
+    // FIXME: (Do not merge while this is present!)
+    // HACK: Sync temperature to the appropriate state
+    switch (mode) {
+      case climate::CLIMATE_MODE_HEAT:
+        target_temperature_low = target_temperature;
+        break;
+      case climate::CLIMATE_MODE_COOL:
+      case climate::CLIMATE_MODE_DRY:
+        target_temperature_high = target_temperature;
+        break;
+      default:
+        break;
+    }
   }
 
   // TODO:
