@@ -107,6 +107,76 @@ class ExtendedConnectRequestPacket : public Packet {
   }
 };
 
+class IdentifyPacketRequestCD : public Packet {
+ public:
+  static IdentifyPacketRequestCD &instance() {
+    static IdentifyPacketRequestCD instance;
+    return instance;
+  }
+  using Packet::Packet;
+
+ private:
+  IdentifyPacketRequestCD() : Packet(RawPacket(PacketType::EXTENDED_CONNECT_REQUEST, 1)) {
+    pkt_.set_payload_byte(0, 0xCD);
+  }
+};
+
+class IdentifyPacketRequestCE : public Packet {
+ public:
+  static IdentifyPacketRequestCE &instance() {
+    static IdentifyPacketRequestCE instance;
+    return instance;
+  }
+  using Packet::Packet;
+
+ private:
+  IdentifyPacketRequestCE() : Packet(RawPacket(PacketType::EXTENDED_CONNECT_REQUEST, 1)) {
+    pkt_.set_payload_byte(0, 0xCE);
+  }
+};
+
+class IdentifyPacketRequestCF : public Packet {
+ public:
+  static IdentifyPacketRequestCF &instance() {
+    static IdentifyPacketRequestCF instance;
+    return instance;
+  }
+  using Packet::Packet;
+
+ private:
+  IdentifyPacketRequestCF() : Packet(RawPacket(PacketType::EXTENDED_CONNECT_REQUEST, 1)) {
+    pkt_.set_payload_byte(0, 0xCF);
+  }
+};
+
+class IdentifyPacketRequestD0 : public Packet {
+ public:
+  static IdentifyPacketRequestD0 &instance() {
+    static IdentifyPacketRequestD0 instance;
+    return instance;
+  }
+  using Packet::Packet;
+
+ private:
+  IdentifyPacketRequestD0() : Packet(RawPacket(PacketType::EXTENDED_CONNECT_REQUEST, 1)) {
+    pkt_.set_payload_byte(0, 0xD0);
+  }
+};
+
+class IdentifyPacketRequestD1 : public Packet {
+ public:
+  static IdentifyPacketRequestD1 &instance() {
+    static IdentifyPacketRequestD1 instance;
+    return instance;
+  }
+  using Packet::Packet;
+
+ private:
+  IdentifyPacketRequestD1() : Packet(RawPacket(PacketType::EXTENDED_CONNECT_REQUEST, 1)) {
+    pkt_.set_payload_byte(0, 0xD1);
+  }
+};
+
 class ExtendedConnectResponsePacket : public Packet {
   using Packet::Packet;
 
