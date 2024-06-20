@@ -457,8 +457,8 @@ void MitsubishiUART::handle_thermostat_state_download_request(const GetRequestPa
 
   auto response = ThermostatStateDownloadResponsePacket();
 
-  response.set_heat_setpoint(this->last_heat_setpoint_);
-  response.set_cool_setpoint(this->last_cool_setpoint_);
+  // response.set_heat_setpoint(this->last_heat_setpoint_);
+  // response.set_cool_setpoint(this->last_cool_setpoint_);
 
   if (this->time_source_ != nullptr) {
     response.set_timestamp(this->time_source_->now());
