@@ -493,6 +493,7 @@ class ThermostatStateUploadPacket : public Packet {
 
 class ThermostatStateDownloadResponsePacket : public Packet {
   static const uint8_t PLINDEX_ADAPTER_TIMESTAMP = 1;
+  static const uint8_t PLINDEX_AUTO_MODE = 7;
   static const uint8_t PLINDEX_HEAT_SETPOINT = 7;
   static const uint8_t PLINDEX_COOL_SETPOINT = 8;
 
@@ -504,6 +505,7 @@ class ThermostatStateDownloadResponsePacket : public Packet {
   }
 
   ThermostatStateDownloadResponsePacket &set_timestamp(ESPTime ts);
+  ThermostatStateDownloadResponsePacket &set_auto_mode(bool is_auto);
   ThermostatStateDownloadResponsePacket &set_heat_setpoint(float highTemp);
   ThermostatStateDownloadResponsePacket &set_cool_setpoint(float lowTemp);
 };

@@ -327,6 +327,11 @@ ThermostatStateDownloadResponsePacket &ThermostatStateDownloadResponsePacket::se
   return *this;
 }
 
+ThermostatStateDownloadResponsePacket &ThermostatStateDownloadResponsePacket::set_auto_mode(bool is_auto) {
+  pkt_.set_payload_byte(PLINDEX_AUTO_MODE, is_auto ? 0x01 : 0x00);
+  return *this;
+}
+
 ThermostatStateDownloadResponsePacket &ThermostatStateDownloadResponsePacket::set_heat_setpoint(float highTemp) {
   uint8_t temp_a = highTemp != NAN ? MUARTUtils::deg_c_to_temp_scale_a(highTemp) : 0x00;
 
